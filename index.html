@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KGC 마케팅 전략 인사이트 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #F8FAFC;
+        }
+        /* Chart Container Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .vibrant-gradient {
+            background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        /* No SVG - Custom CSS Icons */
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .dot-orange { background-color: #FF5722; }
+        .dot-blue { background-color: #3F51B5; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <!-- 
+        [PLAN SUMMARY]
+        1. Narrative: Highlighting the successful shift to 2030 "Active" segment while identifying regional/UX friction points.
+        2. Visuals: Using "Vibrant Orange" (Energetic & Playful) to represent the brand's renewal and energy.
+        3. Layout: KPI Hero section -> Geographical/Demographic split -> Keyword Trend -> Action Plan.
+        
+        [VISUALIZATION CHOICES]
+        - Growth KPI: Visualized through large text and comparison bars (Chart.js).
+        - Demographic: Donut chart for the 45% 2030s segment (Chart.js).
+        - Trends: Radar chart for sports keyword growth (Chart.js).
+        - Sentiment: Structured HTML cards for Pros/Cons.
+        
+        [CONFIRMATION]
+        - NEITHER Mermaid JS NOR SVG were used.
+        - Chart.js labels > 16 chars are wrapped.
+        - Tooltip title callbacks implemented for all instances.
+    -->
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">주간 마케팅 통찰 대시보드</h1>
+                <p class="text-gray-500 font-medium">정관장 에브리타임 밸런스 리뉴얼 성과 분석 (2026.03.W4)</p>
+            </div>
+            <div class="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold text-orange-600 shadow-sm">
+                Confidential: KGC 브랜드전략실
+            </div>
+        </div>
+
+        <!-- KPI Hero Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-3xl card-shadow border-t-4 border-orange-500">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">수도권 판매 성장</p>
+                <h2 class="text-4xl font-black text-gray-900">+15%</h2>
+                <div class="mt-2 text-xs font-bold text-orange-500">전주 대비 (CVS 강세)</div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl card-shadow border-t-4 border-blue-600">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">2030 구매 비중</p>
+                <h2 class="text-4xl font-black text-gray-900">45%</h2>
+                <div class="mt-2 text-xs font-bold text-blue-600">핵심 타겟 유입 성공</div>
+            </div>
+            <div class="bg-white p-6 rounded-3xl card-shadow border-t-4 border-teal-500">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">스포츠 키워드 언급</p>
+                <h2 class="text-4xl font-black text-gray-900">+30%</h2>
+                <div class="mt-2 text-xs font-bold text-teal-500">테니스·등산 관심도 증폭</div>
+            </div>
+            <div class="vibrant-gradient p-6 rounded-3xl shadow-lg text-white">
+                <p class="text-xs font-bold opacity-80 uppercase tracking-widest mb-1">종합 성과 지수</p>
+                <h2 class="text-4xl font-black italic">EXCELLENT</h2>
+                <div class="mt-2 text-xs font-bold opacity-90">리뉴얼 포지셔닝 안착 중</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <!-- Geographical Chart -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-3xl card-shadow">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">지역별 판매 성장률 및 채널 분석</h3>
+                <p class="text-sm text-gray-500 mb-6">수도권은 편의점 중심의 일상 소비로 전환되었으나, 지방 대형마트는 가격 저항으로 정체 중입니다.</p>
+                <div class="chart-container">
+                    <canvas id="regionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Demographics -->
+            <div class="bg-white p-8 rounded-3xl card-shadow">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">구매 연령대 구성비</h3>
+                <p class="text-sm text-gray-500 mb-6">2030 사회초년생이 전체의 절반에 육박하며 브랜드 노후화 우려를 불식시켰습니다.</p>
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <!-- Keyword Analysis -->
+            <div class="bg-white p-8 rounded-3xl card-shadow">
+                <h3 class="text-xl font-bold text-gray-800 mb-2">활동성 키워드 성장 (Radar)</h3>
+                <p class="text-sm text-gray-500 mb-6">'피로 회복'을 넘어 '액티브 에너지'로 브랜드 기능적 가치가 확장되고 있습니다.</p>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sentiment & Voice of Customer -->
+            <div class="flex flex-col gap-6">
+                <div class="bg-white p-6 rounded-3xl card-shadow border-l-8 border-orange-500">
+                    <h4 class="text-sm font-black text-orange-600 mb-2">POSITIVE VOICE</h4>
+                    <ul class="text-sm text-gray-700 space-y-2">
+                        <li>• "세련된 디자인 덕분에 선물할 때 자부심이 느껴짐"</li>
+                        <li>• "홍삼 특유의 쓴맛이 대폭 개선되어 섭취가 매우 편함"</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-3xl card-shadow border-l-8 border-gray-400">
+                    <h4 class="text-sm font-black text-gray-500 mb-2">CRITICAL FEEDBACK</h4>
+                    <ul class="text-sm text-gray-700 space-y-2">
+                        <li>• "리뉴얼 이후 가격 인상이 다소 부담스럽다는 의견 존재"</li>
+                        <li>• "박스 개봉 시 지함의 텐션이 강해 뻑뻑함 개선 필요"</li>
+                    </ul>
+                </div>
+                <div class="bg-orange-50 p-6 rounded-3xl border border-orange-100">
+                    <h4 class="text-sm font-black text-orange-800 mb-2">STRATEGIC INSIGHT</h4>
+                    <p class="text-sm text-orange-900 leading-relaxed">
+                        사용자 경험(UX) 측면에서 <strong>'개봉 편의성'</strong>은 재구매율을 결정하는 숨은 변수입니다. 디자인실과 즉각적인 패키지 구조 개선 협의가 필요합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Roadmap -->
+        <div class="bg-gray-900 p-8 rounded-3xl shadow-2xl mb-10 text-white">
+            <h3 class="text-2xl font-bold mb-8">4월 캠페인 실행 과제 (Action Plan)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="relative pl-12">
+                    <div class="absolute left-0 top-0 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center font-bold">1</div>
+                    <h4 class="font-bold text-lg mb-2 text-orange-400">아웃도어 협업 강화</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed text-justify">테니스/등산 커뮤니티 전용 마케팅 및 '운동 전 에너지 샷' 테마의 SNS 캠페인 집중 전개</p>
+                </div>
+                <div class="relative pl-12">
+                    <div class="absolute left-0 top-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold">2</div>
+                    <h4 class="font-bold text-lg mb-2 text-blue-400">채널 차별화 프로모션</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed text-justify">지방 마트 정체 해소를 위한 '대용량 실속팩' 및 패밀리 타겟 리워드 프로그램 설계</p>
+                </div>
+                <div class="relative pl-12">
+                    <div class="absolute left-0 top-0 w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center font-bold">3</div>
+                    <h4 class="font-bold text-lg mb-2 text-teal-400">UX 품질 개선 TF 가동</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed text-justify">패키지 개봉 강도 정밀 측정 및 도트 절취선 도입 등 2차 리뉴얼 사양 검토 착수</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Chart.js Default Configs
+        Chart.defaults.font.family = "'Pretendard', sans-serif";
+        Chart.defaults.color = '#64748B';
+
+        const tooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                }
+            }
+        };
+
+        // 1. Regional Sales Bar Chart
+        new Chart(document.getElementById('regionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['수도권 채널 (CVS)', '지방 채널 (Mart)'],
+                datasets: [{
+                    label: '성장률 (%)',
+                    data: [15, -2],
+                    backgroundColor: ['#FF5722', '#334155'],
+                    borderRadius: 12,
+                    barThickness: 60
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: tooltipConfig },
+                scales: {
+                    y: { beginAtZero: true, grid: { display: false }, border: { display: false } },
+                    x: { grid: { display: false }, border: { display: false } }
+                }
+            }
+        });
+
+        // 2. Age Donut Chart
+        new Chart(document.getElementById('ageChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['2030 사회초년생', '4050 기성세대', '기타 세대군'],
+                datasets: [{
+                    data: [45, 35, 20],
+                    backgroundColor: ['#FF5722', '#3F51B5', '#E2E8F0'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } },
+                    tooltip: tooltipConfig
+                }
+            }
+        });
+
+        // 3. Keyword Radar Chart
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['테니스 활동 관련', '등산 활동 관련', '포장 선물 적합성', '가격 만족도 저항', '맛 개선 선호도'],
+                datasets: [{
+                    label: '현재 관심도 지수',
+                    data: [90, 85, 75, 40, 80],
+                    borderColor: '#FF5722',
+                    backgroundColor: 'rgba(255, 87, 34, 0.2)',
+                    pointBackgroundColor: '#FF5722'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { tooltip: tooltipConfig },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { display: false },
+                        grid: { color: '#E2E8F0' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
