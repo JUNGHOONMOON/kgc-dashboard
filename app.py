@@ -2,156 +2,116 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 페이지 설정
-st.set_page_config(
-    page_title="KGC Brand Strategy Dashboard",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# 1. 페이지 기본 설정
+st.set_page_config(page_title="KGC 브랜드전략실 - 대시보드", layout="wide")
 
-# KGC 브랜드 아이덴티티를 위한 커스텀 CSS
+# --- [데이터 로드 섹션] ---
+# 사용자님의 시트 ID (공유 설정이 되어 있어야 합니다)
+SHEET_ID = "1vMwTPja0QsD6FA9sPy7W8zoA_40mR4M93F2-1caFWrI"
+
+# 구글 시트 URL (Secrets에 저장했다면 st.secrets["gsheet_url"]로 대체 가능)
+KPI_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid=0"
+
+@st.cache_data(ttl=60)  # 1분간 캐시 유지
+def load_data(url):
+    return pd.read_csv(url)
+
+try:
+    # 1. KPI 데이터 로드 (image_bcd3fe.png의 데이터가 들어있는 시트)
+    df_raw = load_data(KPI_URL)
+    
+    # 2. KPI 카드용 데이터 분리 (상위 4개 행)
+    df_kpi = df_raw.head(4)
+
+    # 3. AI 요약 내용 추출 (A7 셀 위치: index 5, column 0)
+    # 데이터가 부족할 경우를 대비해 예외 처리 포함
+    if len(df_raw) >= 6:
+        ai_summary = df_raw.iloc[5, 0]
+    else:
+        ai_summary = "현재 구글 시트에서 데이터를 분석 중입니다. 잠시만 기다려주세요."
+
+except Exception as e:
+    st.error(f"⚠️ 데이터를 불러올 수 없습니다. 시트 설정을 확인해주세요. ({e})")
+    st.stop()
+
+# -----------------------
+
+# 2. 커스텀 CSS (KGC 브랜드 컬러 반영)
 st.markdown("""
     <style>
-    .main {
-        background-color: #f8fafc;
-    }
-    .stMetric {
-        background-color: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #b91c1c;
-    }
-    div[data-testid="stMetricDelta"] > div {
-        font-weight: bold;
-    }
-    .action-card {
-        background-color: #1e293b;
-        color: white;
-        padding: 20px;
-        border-radius: 15px;
-        height: 100%;
-        border-left: 5px solid #b91c1c;
-    }
-    h1, h2, h3 {
-        font-family: 'Inter', sans-serif;
-    }
+    .kpi-value { font-size: 28px; font-weight: bold; color: #A6192E; }
+    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #f0f2f6; }
+    [data-testid="stMetricDelta"] > div:nth-child(2) { font-size: 14px !important; }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# 헤더 영역
-col_header_1, col_header_2 = st.columns([3, 1])
-with col_header_1:
-    st.title("에브리타임 밸런스 마케팅 통찰 📈")
-    st.caption("2026년 3월 4주차 | KGC 브랜드 전략실 실시간 대시보드")
-
-with col_header_2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.button("📥 PDF 리포트 다운로드", use_container_width=True)
+# 3. 헤더 영역
+col_header1, col_header2 = st.columns([3, 1])
+with col_header1:
+    st.title("📈 에브리타임 밸런스 마케팅 대시보드")
+    st.markdown("**2026년 3월 4주차 | 리뉴얼 제품 판매 및 여론 분석**")
+with col_header2:
+    st.write("") 
+    st.info("👤 **팀장: 인선미** (Brand Strategy)")
 
 st.divider()
 
-# 상단 KPI 카드 레이아웃
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+# 4. KPI 카드 영역 (image_bcd3fe.png의 데이터 기반)
+# 4개의 지표(수도권 판매량, 핵심 타겟층, 스포츠 키워드, 긍정 리뷰)를 가로로 배치
+kpi_cols = st.columns(len(df_kpi))
+for i, col in enumerate(kpi_cols):
+    # 값에 따라 색상이나 포맷을 조정할 수 있습니다.
+    label_text = df_kpi.iloc[i]['label']
+    value_text = str(df_kpi.iloc[i]['value'])
+    delta_text = df_kpi.iloc[i]['delta']
+    
+    # delta_color 설정 (필요에 따라 조정 가능)
+    col.metric(
+        label=label_text, 
+        value=value_text, 
+        delta=delta_text,
+        delta_color="normal"
+    )
 
-with kpi1:
-    st.metric(label="수도권 판매 성장", value="+15%", delta="전주 대비 15%↑", delta_color="normal")
-    st.caption("CVS 채널 점유율 1위 달성")
+st.markdown("<br>", unsafe_allow_html=True)
 
-with kpi2:
-    st.metric(label="지방 판매 추이", value="-2%", delta="전주 대비 2%↓", delta_color="inverse")
-    st.caption("대형마트 채널 정체 지속")
+# 5. 시각화 및 분석 영역
+col_left, col_right = st.columns([2, 1])
 
-with kpi3:
-    st.metric(label="2030 세대 비중", value="45%", delta="핵심 타겟 전환 가속")
-    st.caption("리뉴얼 후 유입 급증")
-
-with kpi4:
-    st.metric(label="운동 TPO 언급량", value="+30%", delta="Hot Keyword", delta_color="normal")
-    st.caption("테니스·등산 연계성 강화")
-
-st.write("")
-
-# 중단 차트 영역
-col_chart_1, col_chart_2 = st.columns([1.2, 1])
-
-with col_chart_1:
-    st.subheader("📍 채널별 판매 기여도 분석")
-    chart_data = pd.DataFrame({
-        "채널": ['수도권(CVS)', '수도권(마트)', '지방(마트)', '지방(CVS)', '온라인/기타'],
-        "증감률": [15, 8, -2, 1, 5]
-    })
+with col_left:
+    st.subheader("📊 항목별 상세 수치 분석")
+    # 그래프를 위해 value에서 % 제거 후 숫자로 변환
+    df_plot = df_kpi.copy()
+    df_plot['numeric_value'] = pd.to_numeric(df_plot['value'].astype(str).str.replace('%', ''), errors='coerce')
     
     fig = px.bar(
-        chart_data, 
-        x='채널', 
-        y='증감률',
-        color='증감률',
-        color_continuous_scale=['#64748b', '#b91c1c'],
-        text_auto=True
+        df_plot, x="label", y="numeric_value", text="value",
+        color="label", color_discrete_sequence=['#A6192E', '#C5A059', '#94a3b8', '#475569']
     )
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        showlegend=False,
-        margin=dict(l=20, r=20, t=20, b=20)
-    )
+    fig.update_layout(showlegend=False, margin=dict(t=20, b=20, l=0, r=0), height=350)
     st.plotly_chart(fig, use_container_width=True)
 
-with col_chart_2:
-    st.subheader("💬 고객 리뷰 밸런스 (N=500)")
+    st.subheader("💡 팀장 전략 제언 (Action Items)")
+    st.info("""
+    1. **아웃도어 마케팅:** '스포츠 키워드' 언급 증가에 따른 테니스/등산 커뮤니티 연계 캠페인 강화
+    2. **타겟 확장:** 핵심 타겟층(4050) 외 사회초년생 구매 비중 증가에 따른 타겟팅 광고 세분화
+    3. **리뷰 관리:** 긍정 리뷰 내 '패키지/맛 만족도' 키워드를 상세페이지 마케팅 포인트로 활용
+    """)
+
+with col_right:
+    st.subheader("🔥 트렌드 키워드")
+    st.markdown("`#사회초년생` `#테니스` `#오운완` `#선물추천` `#등산` `#에너지부스터`")
     
-    # 감성 분석 바
-    pos, neu, neg = 72, 18, 10
-    st.write("긍정 반응 (72%)")
-    st.progress(pos/100)
-    st.write("중립 반응 (18%)")
-    st.progress(neu/100)
-    st.write("부정 반응 (10%)")
-    st.progress(neg/100)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.subheader("📌 Today's Summary")
+    # 구글 시트 A7 셀의 내용을 표시
+    st.warning(ai_summary)
+    st.caption("※ 구글 시트의 마케팅 데이터를 Gemini AI가 실시간 분석한 결과입니다.")
     
-    st.info("**핵심 긍정:** 세련된 디자인 & 완화된 쓴맛에 대한 MZ세대 선호도 상승")
-    st.warning("**핵심 부정:** 가격 인상 체감 및 패키지 개봉 편의성 개선 요구")
+    st.markdown("---")
+    st.subheader("💬 실시간 고객 VOC")
+    st.success("**🟢 Positive**\n\n- 포장이 세련되어 선물용으로 최고\n- 기존보다 쓴맛이 덜해 먹기 편함")
+    st.error("**🔴 Improvement**\n\n- 리뉴얼 후 가격 접근성 고민 필요\n- 일부 패키지 개봉 시 뻑뻑함")
 
-# 하단 전략 액션 플랜
-st.write("")
-st.subheader("🎯 브랜드 전략실 우선순위 액션 플랜")
-
-plan1, plan2, plan3 = st.columns(3)
-
-with plan1:
-    st.markdown("""
-        <div class="action-card">
-            <h4>🏃 TPO 확장 (Comm.)</h4>
-            <ul>
-                <li>테니스/등산 인플루언서 협업</li>
-                <li>'오운완' 패키지 마케팅 강화</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-with plan2:
-    st.markdown("""
-        <div class="action-card">
-            <h4>🏪 채널 최적화 (Sales)</h4>
-            <ul>
-                <li>지방 마트 '패밀리 팩' 기획</li>
-                <li>CVS 타겟 시간대 프로모션</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-with plan3:
-    st.markdown("""
-        <div class="action-card">
-            <h4>📦 품질 경험 개선 (UX)</h4>
-            <ul>
-                <li>패키지 개봉 공정 즉시 점검</li>
-                <li>프리미엄 언박싱 경험 보강</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.divider()
-st.caption("© 2026 KGC Brand Strategy Team. Data updated as of March 27, 2026.")
+# 하단 푸터
+st.markdown("<br><hr><center style='color: grey;'>KGC Brand Strategy Team Dashboard © 2026</center>", unsafe_allow_html=True)
